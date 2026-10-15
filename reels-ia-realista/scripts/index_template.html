@@ -1,0 +1,288 @@
+<!doctype html>
+<!--
+  Composição HyperFrames de Reels 9:16 (1080x1920, 24 fps) para qualquer vídeo realista da Voltec com a persona.
+  Caso de referência testado: Reels "Verão Conectado" (v5 entregue em 15/10/2026). Com os tokens preenchidos pelos
+  valores dele, este molde passa no lint (0 erros).
+  Fixos da Voltec (ficam como estão): cores, fontes, logo, cartão "Tem Voltec em" com as 4 cidades e o CTA de anúncio
+  pago ("Saiba mais" + QR; post orgânico troca para "link na bio", ver o comentário do #cta).
+  Da campanha (preencha a cada vídeo): os tokens de texto, em MAIÚSCULAS com dois sublinhados de cada lado (gancho,
+  título do cartão da marca e oferta); o ícone opcional #icone; os tempos T e a duração.
+  Tabela dos tokens, com os valores do Verão Conectado: references/edicao-hyperframes.md, seção 13. Nenhum token aparece
+  em comentário: depois de preencher, a busca de tokens da qa-checklist.md §C.0 tem de sair vazia.
+  Uso: copie para a pasta do projeto HyperFrames como index.html, preencha os tokens, ponha em assets/ a logo (logo.png e
+  logo-cta.png) e o QR (qr.svg), rode prep.py (gera media/base.mp4 e media/mix.wav), ajuste os tempos T e a duração
+  (EDITAR), rode build_legendas.py (preenche os marcadores LEGENDAS), confira que não sobrou token e:
+      npx --no-install hyperframes lint
+      npx --no-install hyperframes check    (pega erro de execução, como a trava da oferta: page_error)
+      npx --no-install hyperframes render -o renders/<nome>.mp4 --fps 24 --quality delivery --no-best-effort
+      npx --no-install hyperframes render -o renders/<nome>_legendas.mp4 --fps 24 --quality delivery --no-best-effort --variables '{"legendas":true}'
+  Regras do lint que pegaram: anime só opacity/transform/clip-path (nada de height/margin); estado inicial escondido no CSS
+  (opacity:0), não com tl.set em 0. DURAÇÃO: aparece no root, #base, #mix, #gfx e em DUR no script; tem de ser
+  TOTAL/FPS do prep.py (ex.: Verão Conectado, 20,5 s; ajuste).
+  QR: gere assets/qr.svg ANTES do prep.py e do render. Sem o arquivo, o render (0.8.161) sai sem QR e não falha (por isso
+  o --no-best-effort acima); o lint acusa missing_local_asset e sai com código 1.
+-->
+<html lang="pt-BR" data-resolution="portrait" data-composition-variables='[{"id":"legendas","type":"boolean","label":"Legendas","default":false}]'>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800;900&family=Barlow:wght@600;700&display=block"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; background: #000; }
+      /* cores da Voltec, fixas em toda campanha (vermelho #d7262f, grafite #2f2f33) */
+      body { font-family: "Barlow", sans-serif; --red: #d7262f; --dark: #2f2f33; --ink: #1f1f22; }
+
+      #base { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; object-fit: cover; transform-origin: 50% 40%; }
+      #veil { position: absolute; inset: 0; background: rgba(24, 14, 6, 0.38); opacity: 0; }
+      /* estado inicial escondido AQUI no CSS (o lint reclama de tl.set em 0) */
+      #brand, #cities, #offer, #cta { opacity: 0; }
+
+      /* Zona segura do Reels: texto só em x 64–930, y 220–1480 (topo, rodapé e coluna de botões ficam livres).
+         Nunca sobre o rosto nem sobre o objeto que a pessoa segura. */
+
+      /* Gancho: texto no estilo nativo do Instagram, numa área lisa e livre do quadro, do lado oposto ao braço erguido
+         (Verão Conectado: céu, no alto à direita, no take 1). Deixe esse espaço livre já no snapshot; se a área livre
+         for outra, mude right/top (e o transform-origin para o canto fixo), sempre dentro da zona segura. */
+      #q1 {
+        position: absolute; right: 150px; top: 250px; transform-origin: 100% 0%; max-width: 866px;
+        background: #fff; color: var(--ink); border-radius: 18px; padding: 12px 26px 16px;
+        font-family: "Montserrat", sans-serif; font-weight: 800; font-size: 50px; line-height: 1.12; text-align: center;
+        box-shadow: 0 8px 26px rgba(0, 0, 0, 0.18);
+      }
+
+      /* Cartão da marca no terço inferior (logo para fundo claro sempre sobre painel branco):
+         logo + título da campanha em 2 partes (.t1 vermelha, .t2 grafite) com o ícone opcional #icone entre elas.
+         Ancorado pela BASE (y 1426, como no v5): título mais largo que 834 px passa a parte .t2 para a 2ª linha sozinho
+         e o cartão cresce para cima, sem sair da zona segura. A linha do título pode ocupar o padding direito
+         (margin-right negativo): o título do Verão Conectado mede ~821 px e cabe numa linha, encostado na borda. */
+      .card {
+        position: absolute; background: #fff; border-radius: 26px;
+        box-shadow: 0 14px 44px rgba(20, 10, 0, 0.30);
+      }
+      #brand { left: 64px; bottom: 494px; width: 866px; padding: 24px 32px 26px; }
+      #brand img { display: block; height: 78px; width: auto; }
+      #brand .title { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 14px -32px 0 0; font-family: "Montserrat", sans-serif; font-weight: 900; font-size: 70px; line-height: 1; letter-spacing: -1px; }
+      #brand .t1 { color: var(--red); }
+      #brand .t2 { color: var(--dark); }
+      #icone { width: 64px; height: 64px; flex: none; margin-top: -8px; }
+
+      /* Lista (cidades) e oferta no mesmo lugar, sobre o tronco, com o rosto no alto (Verão Conectado: take 3, selfie) */
+      #cities { left: 64px; top: 1120px; width: 560px; padding: 22px 30px 24px; }
+      #cities .lead { font-weight: 700; font-size: 30px; color: #6a6a70; letter-spacing: 0.5px; text-transform: uppercase; }
+      #cities .city { display: flex; align-items: center; gap: 14px; margin-top: 10px; opacity: 0.3; font-weight: 700; font-size: 46px; line-height: 1.1; color: var(--ink); }
+      #cities .pin { width: 30px; height: 38px; flex: none; }
+
+      /* Oferta: título em faixa vermelha + uma ou mais linhas em faixa grafite (.offer-sub; uma entrada em T.offerSub
+         por linha). Título + 2 linhas terminam em y 1480, o limite da zona segura; 3 linhas não cabem (conferido em
+         snapshot; a sessão só usou 1 linha). */
+      #offer { position: absolute; left: 64px; top: 1200px; max-width: 866px; }
+      #offer-main {
+        display: inline-block; background: var(--red); color: #fff; border-radius: 12px;
+        font-family: "Montserrat", sans-serif; font-weight: 800; font-size: 60px; line-height: 1.05; padding: 10px 28px 16px;
+        box-shadow: 0 12px 36px rgba(60, 10, 0, 0.30);
+      }
+      #offer .offer-sub {
+        display: table; margin-top: 14px; background: var(--dark); color: #fff; border-radius: 12px;
+        font-weight: 700; font-size: 52px; padding: 8px 26px 12px; box-shadow: 0 12px 36px rgba(0, 0, 0, 0.30);
+      }
+
+      /* Legendas (só com --variables '{"legendas":true}'): faixa logo abaixo do rosto (y≈1000) e acima dos cartões */
+      #legendas { position: absolute; left: 64px; top: 1000px; width: 866px; height: 90px; }
+      .leg.low { top: 250px; }  /* trecho em que a legenda cobriria o objeto na mão (LOW_RANGES no build_legendas.py) */
+      .leg {
+        position: absolute; left: 0; right: 0; top: 0; margin: 0 auto; width: fit-content; opacity: 0; white-space: nowrap;
+        background: rgba(18, 18, 20, 0.68); color: #fff; border-radius: 14px; padding: 4px 20px 10px;
+        font-family: "Montserrat", sans-serif; font-weight: 800; font-size: 54px; line-height: 1.15; letter-spacing: -0.3px;
+      }
+
+      /* CTA final sobre o vídeo desfocado e escurecido */
+      #cta { left: 107px; top: 430px; width: 780px; padding: 40px 48px 36px; text-align: center; transform-origin: 50% 50%; }
+      #cta img.logo { display: block; height: 104px; width: auto; margin: 0 auto; }
+      #cta .assine { margin-top: 26px; font-family: "Montserrat", sans-serif; font-weight: 900; font-size: 92px; line-height: 0.95; color: var(--red); letter-spacing: -1px; }
+      #cta .bio { margin-top: 16px; font-weight: 700; font-size: 50px; color: var(--ink); }
+      #cta .bio b { color: var(--red); }
+      /* pulso em palavra inline: inline-block + transform-origin no lado FIXO (senão encosta na palavra anterior) */
+      #saiba { display: inline-block; transform-origin: 0% 60%; }
+      #cta .rule { height: 3px; background: #ece7e0; margin: 30px 0 26px; border-radius: 2px; }
+      #cta .qr-row { display: flex; align-items: center; justify-content: center; gap: 28px; text-align: left; }
+      #qr-img { display: block; width: 250px; height: 250px; flex: none; }
+      #cta .qr-text { font-weight: 700; font-size: 34px; line-height: 1.2; color: var(--ink); }
+      #cta .qr-text span { display: block; font-weight: 600; font-size: 28px; color: #6a6a70; margin-top: 6px; }
+      #cta .towns { margin-top: 28px; font-weight: 600; font-size: 27px; color: #6a6a70; }
+    </style>
+  </head>
+  <body>
+    <!-- EDITAR: duração = TOTAL/24 do prep.py no root, #base, #mix e #gfx (data-duration) e em DUR no script (ex.: Verão Conectado, 20,5 s; ajuste) -->
+    <div id="root" data-composition-id="main" data-start="0" data-duration="20.5" data-fps="24" data-width="1080" data-height="1920">
+      <!-- base pré-cortada no ffmpeg (prep.py), com o fim congelado sob o CTA: mais robusto que vários clipes -->
+      <video id="base" class="clip" src="media/base.mp4" playsinline muted data-start="0" data-duration="20.5" data-track-index="0"></video>
+      <audio id="mix" src="media/mix.wav" data-start="0" data-duration="20.5" data-volume="1"></audio>
+
+      <div id="gfx" class="clip" data-start="0" data-duration="20.5" data-track-index="1" style="position: absolute; inset: 0">
+        <div id="veil"></div>
+
+        <!-- EDITAR: gancho, o 1º texto na tela, em 1 ou 2 linhas curtas (Verão Conectado: a pergunta do problema,
+             "Casa de praia" / "sem internet?"). Uma linha só: apague o <br /> e a 2ª linha. -->
+        <div id="q1">__GANCHO_L1__<br />__GANCHO_L2__</div>
+
+        <!-- EDITAR: cartão da marca = logo (fixa, para fundo claro) + título da campanha em 2 partes: .t1 em vermelho e .t2 em
+             grafite (Verão Conectado: "VERÃO" e "CONECTADO", numa linha, com o sol entre elas). Título de uma parte só:
+             apague o span .t2. Se as partes não couberem numa linha, a .t2 desce sozinha para a 2ª linha (CSS do #brand).
+             O script só anima as partes que existirem. -->
+        <div id="brand" class="card">
+          <img src="assets/logo.png" alt="Voltec" />
+          <div class="title">
+            <span class="t1">__TITULO_1__</span>
+            <!-- EDITAR: ícone OPCIONAL da campanha. Este desenho é o sol do Verão Conectado: em outra campanha, troque o desenho
+                 (mantenha id="icone") ou apague o <svg> inteiro. O grupo com a classe "gira" roda devagar enquanto o cartão está
+                 na tela (aqui, os raios do sol); um ícone sem esse grupo só entra com o giro curto do #icone. -->
+            <svg id="icone" viewBox="-50 -50 100 100">
+              <g class="gira" stroke="#f39a1e" stroke-width="6" stroke-linecap="round">
+                <line x1="0" y1="-30" x2="0" y2="-45" />
+                <line x1="0" y1="-30" x2="0" y2="-45" transform="rotate(45)" />
+                <line x1="0" y1="-30" x2="0" y2="-45" transform="rotate(90)" />
+                <line x1="0" y1="-30" x2="0" y2="-45" transform="rotate(135)" />
+                <line x1="0" y1="-30" x2="0" y2="-45" transform="rotate(180)" />
+                <line x1="0" y1="-30" x2="0" y2="-45" transform="rotate(225)" />
+                <line x1="0" y1="-30" x2="0" y2="-45" transform="rotate(270)" />
+                <line x1="0" y1="-30" x2="0" y2="-45" transform="rotate(315)" />
+              </g>
+              <circle r="22" fill="#f6a623" />
+            </svg>
+            <span class="t2">__TITULO_2__</span>
+          </div>
+        </div>
+
+        <!-- Fixo da Voltec: lista que acende no ritmo da narração (as 4 cidades atendidas, nesta ordem); só os tempos T.cities mudam -->
+        <div id="cities" class="card">
+          <div class="lead">Tem Voltec em</div>
+          <div class="city"><svg class="pin" viewBox="0 0 30 38"><path d="M15 0C6.7 0 0 6.6 0 14.8 0 25.9 15 38 15 38s15-12.1 15-23.2C30 6.6 23.3 0 15 0z" fill="#d7262f"/><circle cx="15" cy="14.5" r="5.6" fill="#fff"/></svg>Grussaí</div>
+          <div class="city"><svg class="pin" viewBox="0 0 30 38"><path d="M15 0C6.7 0 0 6.6 0 14.8 0 25.9 15 38 15 38s15-12.1 15-23.2C30 6.6 23.3 0 15 0z" fill="#d7262f"/><circle cx="15" cy="14.5" r="5.6" fill="#fff"/></svg>Atafona</div>
+          <div class="city"><svg class="pin" viewBox="0 0 30 38"><path d="M15 0C6.7 0 0 6.6 0 14.8 0 25.9 15 38 15 38s15-12.1 15-23.2C30 6.6 23.3 0 15 0z" fill="#d7262f"/><circle cx="15" cy="14.5" r="5.6" fill="#fff"/></svg>Chapéu do Sol</div>
+          <div class="city"><svg class="pin" viewBox="0 0 30 38"><path d="M15 0C6.7 0 0 6.6 0 14.8 0 25.9 15 38 15 38s15-12.1 15-23.2C30 6.6 23.3 0 15 0z" fill="#d7262f"/><circle cx="15" cy="14.5" r="5.6" fill="#fff"/></svg>São João da Barra</div>
+        </div>
+
+        <!-- EDITAR: oferta, sempre do cliente (nunca invente preço ou prazo): título + linha(s). Mais uma linha: duplique o
+             div .offer-sub e ponha o instante dela em T.offerSub (cabem 2 linhas acima de y 1480). Vídeo sem oferta: apague
+             este div inteiro e deixe offerSub: []. (Verão Conectado: "Planos sem fidelidade" / "de 2 a 5 meses") -->
+        <div id="offer">
+          <span id="offer-main">__OFERTA_TITULO__</span>
+          <div class="offer-sub">__OFERTA_LINHA_1__</div>
+        </div>
+
+        <div id="legendas">
+          <!-- LEGENDAS:INICIO -->
+          <!-- LEGENDAS:FIM -->
+        </div>
+
+        <!-- CTA fixo da Voltec, padrão = anúncio pago: "clique em Saiba mais" (o botão do anúncio) + QR, com a linha das cidades.
+             Post orgânico (sem botão): troque "clique em Saiba mais" por "link na bio", junto com a frase da narração
+             (persona-e-marca-voltec.md §7, tabela "CTA: pago × orgânico"). A voz orgânica não fala "Saiba Mais" nem
+             "QR code": reancore T.pulseSaiba e T.pulseQr numa palavra que ela fala ou ponha null (sem pulso). -->
+        <div id="cta" class="card">
+          <img class="logo" src="assets/logo-cta.png" alt="Voltec" />
+          <div class="assine">ASSINE AGORA</div>
+          <div class="bio">clique em <b id="saiba">Saiba mais</b></div>
+          <div class="rule"></div>
+          <div class="qr-row">
+            <!-- QR: assets/qr.svg, gerado ANTES do render com o pacote npm qrcode (nível M, margem 0) e SEMPRE validado com
+                 scripts/decode.cjs no vídeo final. Destino: pergunte ao cliente (Verão Conectado: https://provedorvoltecinternet.online/?page_id=674,
+                 página "Verão Conectado 2026", arquivo assets/qr-checkout.svg) -->
+            <img id="qr-img" src="assets/qr.svg" alt="QR code da campanha" />
+            <div class="qr-text">ou escaneie<br />o QR code<span>aqui na tela</span></div>
+          </div>
+          <div class="towns">Grussaí · Atafona · Chapéu do Sol · São João da Barra</div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      // ===== EDITAR: tempos em segundos do VÍDEO (alignment do TTS + NARR_OFFSET; cortes = quadros/24 do prep.py) =====
+      // Os valores abaixo são os do v5 do Verão Conectado: ajuste todos. T.cta = CTA_START do build_legendas.py.
+      const DUR = 20.5;                       // = TOTAL/FPS do prep.py (ex.: Verão Conectado, 20,5 s; ajuste)
+      const T = {
+        q1In: 0.3, q1Out: 3.52,               // gancho (Verão Conectado: take 1, 0–3,71 s)
+        brandIn: 3.85, brandOut: 7.72,        // cartão da marca (Verão Conectado: take 2, 3,71–7,92 s; entra com "Agora sim!")
+        citiesIn: 8.05, cities: [8.5, 9.25, 9.92, 10.95], citiesOut: 12.08,  // cada cidade acende quando a voz fala o nome
+        offerIn: 12.3, offerSub: [13.55], offerOut: 15.3,                     // offerSub: um instante por linha .offer-sub
+        cta: 15.4,                            // vídeo desfoca + véu; legendas somem aqui (CTA_START)
+        ctaCard: 15.55,
+        pulseSaiba: 16.35, pulseQr: 17.9,     // pulsos nas palavras "Saiba Mais" e "QR code" da narração; null = sem pulso
+      };
+
+      // Gancho: pergunta no estilo de texto do Instagram
+      tl.fromTo("#q1", { scale: 0.86, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.35, ease: "back.out(1.8)" }, T.q1In);
+      tl.to("#q1", { opacity: 0, duration: 0.15, ease: "power1.in" }, T.q1Out);
+
+      // Marca: as partes .t1/.t2 do título e o #icone (com o grupo .gira) são opcionais; só o que existir é animado
+      tl.fromTo("#brand", { y: 70, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, T.brandIn);
+      const titulo1 = document.querySelector("#brand .t1"), titulo2 = document.querySelector("#brand .t2");
+      const icone = document.querySelector("#icone"), giro = document.querySelector("#icone .gira");
+      if (titulo1) tl.from(titulo1, { x: -40, duration: 0.6, ease: "power3.out" }, T.brandIn + 0.1);
+      if (titulo2) tl.from(titulo2, { x: 40, duration: 0.6, ease: "power3.out" }, T.brandIn + 0.1);
+      if (icone) tl.from(icone, { scale: 0, rotation: -90, transformOrigin: "50% 50%", duration: 0.6, ease: "back.out(2)" }, T.brandIn + 0.25);
+      if (giro) tl.to(giro, { rotation: 90, transformOrigin: "50% 50%", duration: 3.6, ease: "none" }, T.brandIn + 0.25);
+      tl.to("#brand", { y: 30, opacity: 0, duration: 0.2, ease: "power1.in" }, T.brandOut);
+
+      // Cidades no ritmo da narração (o cartão mostra todas esmaecidas; cada uma acende na sua palavra)
+      tl.fromTo("#cities", { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, T.citiesIn);
+      document.querySelectorAll("#cities .city").forEach((el, i) => {
+        tl.to(el, { opacity: 1, duration: 0.25, ease: "power1.out" }, T.cities[i]);
+        tl.fromTo(el.querySelector(".pin"), { scale: 0.55 }, { scale: 1, transformOrigin: "50% 100%", duration: 0.4, ease: "back.out(3)" }, T.cities[i]);
+      });
+      tl.to("#cities", { y: 24, opacity: 0, duration: 0.2, ease: "power1.in" }, T.citiesOut);
+
+      // Oferta: título revelado por clip-path (propriedade permitida pelo lint); cada linha entra no seu instante de T.offerSub.
+      // Vídeo sem oferta: apague o <div id="offer"> inteiro e deixe offerSub: [] (a trava abaixo para o check e o render).
+      const oferta = document.querySelector("#offer"), linhasOferta = document.querySelectorAll("#offer .offer-sub");
+      if (linhasOferta.length !== T.offerSub.length) {
+        throw new Error(`oferta: ${linhasOferta.length} linha(s) .offer-sub no HTML e ${T.offerSub.length} instante(s) em T.offerSub`);
+      }
+      if (oferta) {
+        tl.set(oferta, { opacity: 1 }, T.offerIn);
+        tl.from("#offer-main", { clipPath: "inset(0 100% 0 0)", duration: 0.5, ease: "power3.out" }, T.offerIn);
+        linhasOferta.forEach((el, i) => tl.from(el, { opacity: 0, y: -18, duration: 0.4, ease: "power3.out" }, T.offerSub[i]));
+        tl.to(oferta, { opacity: 0, duration: 0.18, ease: "power1.in" }, T.offerOut);
+      }
+
+      // CTA: vídeo desfoca e escurece. A escala sobe JUNTO com o blur (>= 1 + 6σ/largura; 1,08 para blur 14 px),
+      // senão o desfoque puxa o preto de fora do quadro para as bordas.
+      tl.to("#base", { filter: "blur(14px)", scale: 1.08, duration: 0.4, ease: "power2.out" }, T.cta);
+      tl.to("#base", { scale: 1.13, duration: DUR - T.cta - 0.4, ease: "none" }, T.cta + 0.4);
+      tl.to("#veil", { opacity: 1, duration: 0.4, ease: "power2.out" }, T.cta);
+      tl.fromTo("#cta", { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(1.6)" }, T.ctaCard);
+      const saiba = document.querySelector("#saiba");   // some se o post orgânico tirar o "Saiba mais"
+      if (saiba && T.pulseSaiba != null) tl.to(saiba, { scale: 1.08, duration: 0.25, ease: "sine.inOut", yoyo: true, repeat: 1 }, T.pulseSaiba);
+      if (T.pulseQr != null) tl.to("#qr-img", { scale: 1.07, duration: 0.3, ease: "sine.inOut", yoyo: true, repeat: 1 }, T.pulseQr);
+
+      // Legendas: dados preenchidos por build_legendas.py; só aparecem com --variables '{"legendas":true}'
+      /* LEGENDAS:DADOS */ const LEGENDAS = []; /* LEGENDAS:FIM */
+      const vars = (window.__hyperframes && window.__hyperframes.getVariables) ? window.__hyperframes.getVariables() : {};
+      const legEls = document.querySelectorAll("#legendas .leg");
+      if (vars.legendas === true || vars.legendas === "true") {
+        LEGENDAS.forEach((d, i) => {
+          const el = legEls[i];
+          tl.set(el, { opacity: 1 }, d.s);
+          tl.set(el, { opacity: 0 }, d.e);
+          el.querySelectorAll(".w").forEach((w, j) => {
+            tl.set(w, { color: "#ffd36b" }, d.w[j][1]);                                   // palavra falada em destaque
+            tl.set(w, { color: "#ffffff" }, j + 1 < d.w.length ? d.w[j + 1][1] : d.e);
+          });
+        });
+      } else {
+        document.getElementById("legendas").style.display = "none";
+      }
+
+      tl.set({}, {}, DUR);   // garante que a timeline dura o vídeo inteiro
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>
