@@ -1,6 +1,6 @@
 ---
 name: reels-ia-realista
-description: Produz e edita vídeos realistas com IA da Voltec (provedor de internet de São João da Barra-RJ) estrelados pela personagem/modelo da marca, em Reels, Stories ou anúncio 9:16 de qualquer campanha, estação ou tema (promoção, institucional, dica de Wi-Fi, suporte, inauguração), em locais reais da região (Grussaí, Atafona, Chapéu do Sol, São João da Barra) ou em cena interna, com portões de aprovação do cliente, fotos licenciadas, snapshot aprovado antes de qualquer vídeo, ElevenLabs (gpt-image-2.5, Veo 3.1 image-to-video, narração com a voz clonada Radassa, SFX e STT para QA) e edição HyperFrames com legendas, CTA e QR validado; use sempre que o pedido for criar ou ajustar um vídeo, Reels, Stories ou anúncio realista com IA da Voltec ou dessa personagem (recortar take, trocar frase ou CTA, versão com legendas, refinar a identidade), e como base adaptável para vídeo realista com IA de outra marca ou persona; não use em assuntos da Voltec sem vídeo, como rede, provisionamento, GenieACS ou TR-069.
+description: Produz e edita vídeos realistas com IA da Voltec (provedor de internet de São João da Barra-RJ) estrelados pela personagem/modelo da marca, em Reels, Stories ou anúncio 9:16 de qualquer campanha, estação ou tema (promoção, institucional, dica de Wi-Fi, suporte, inauguração), em locais reais da região (Grussaí, Atafona, Chapéu do Sol, São João da Barra) ou em cena interna, com narração em off ou com ela falando para a câmera, portões de aprovação do cliente, snapshot aprovado antes de qualquer vídeo, ElevenLabs (gpt-image-2.5, Veo 3.1, voz clonada Radassa por TTS ou troca de voz, SFX e STT) e edição HyperFrames com legendas, CTA e QR validado; use sempre que o pedido for criar ou ajustar um vídeo, Reels, Stories ou anúncio realista com IA da Voltec ou dessa personagem (inclusive com ela falando, recortar take, trocar frase ou CTA, versão com legendas, refinar a identidade), e como base para outra marca ou persona; não use em assuntos da Voltec sem vídeo, como rede, provisionamento, GenieACS ou TR-069.
 ---
 
 # Vídeos realistas com IA da Voltec com a personagem da marca (ElevenLabs + HyperFrames)
@@ -22,6 +22,7 @@ Produção e edição de qualquer vídeo realista com IA da Voltec estrelado pel
 - Geração pela API da ElevenLabs: imagem (snapshot), vídeo (Veo 3.1; Seedance pela API só com liberação, ou manual no app), narração com voz clonada, SFX e STT.
 - Edição no HyperFrames: cortes por quadro, mixagem, cartões, legendas sincronizadas, CTA e QR.
 - Ajuste num vídeo de IA já entregue: recortar take, trocar variação, trocar uma frase ou o CTA, versão com legendas, refinar a identidade.
+- **Com ela falando para a câmera** ("com ela falando", "ela fala", "ela explicando"): modo falando, em `references/modo-falando.md`. O Veo 3.1 gera o take com a fala e o `sts.py` troca a voz para a Radassa. [não testado]
 - **[GERAL]** Outra marca ou persona: o que não é [Voltec] serve, com adaptação (troque o §7.1 e preencha os slots do §1b). Projeto de referência: `/home/syllas/hyperframes/voltec-reels-ia/` (Verão Conectado; só leitura).
 - Não serve para motion graphics sem pessoa nem cena gerada (aí basta o HyperFrames) nem para assuntos da Voltec sem vídeo (rede, GenieACS, TR-069).
 
@@ -32,7 +33,7 @@ Produção e edição de qualquer vídeo realista com IA da Voltec estrelado pel
 1. **Leia nesta ordem:** este SKILL.md (com o §7) → `persona-e-marca-voltec.md` §1–4 e §6–7 → o cenário: em Grussaí, `locais-grussai.md` §1, §3 (com a tabela "Outras estações") e §4; em outro lugar ou cena interna, o §8 deste arquivo, `persona-e-marca-voltec.md` §10 e `locais-grussai.md` §7–§10 → `prompts-principios.md` §1 (com o "Checklist do prompt") → só o molde de `prompts-moldes.md` §2 mais perto da cena (2.1 amiga filmando, 2.2 pose no mesmo lugar, 2.3 selfie, 2.5–2.6 vídeo; cena nova: 2.9–2.10). O resto, só na fase em que precisar. `prompts-moldes.md` e `persona-e-marca-voltec.md` passam do limite de uma leitura do Read: ache a seção com Grep (ex.: `^### 2\.9`, `^## 10`) e leia com offset/limit.
 2. **Já decidido (fixos da Voltec; não pergunte de novo):** persona da conta, com os assets `na7keiYvPpGArmyghOpk`, `pUgU1HXgmdqXfP02iR8T` e `ZY1iDcJLhPFklahPnvkM` já na conta (não suba de novo; persona §4) e as âncoras de rosto, pele e mãos (persona §3.1–3.3); voz "Radassa 100%" `4yvYc2GSakxLWMhlsd6b`, eleven_v4, 0.45/0.85, `"pt"`, e o A/B agora é entre 2 seeds dessa voz; pronúncia vol-TÉC ("Voltéc" no TTS, "Voltec" na tela); sem joias nem tatuagens; sem música; logo, cores, fontes e cidades (§7.1); as regras de realismo, prompt e QA (§3, `qa-checklist.md`) e os portões (§2). Modelo: Veo 3.1 pela API, escolhido em 15/10/2026; só volte à pergunta se o teste de acesso sem custo (`modelos-e-custos.md` §2.2) ou a revisão de catálogo da Fase 1 mudarem o quadro.
 3. **Slots do vídeo:** pergunte sempre, antes de escrever a narração (no chat basta). Exemplo preenchido no §7.2.
-   - **Vêm do cliente (nunca invente):** tema e formato (Reels, Stories, anúncio); oferta, preço, condições e período; anúncio pago (botão "Saiba mais" + QR) ou post orgânico ("link na bio"); destino do QR (o `page_id=674` é a página "Verão Conectado 2026": não o reaproveite sem o cliente confirmar); se os créditos das fotos CC BY vão na legenda do post.
+   - **Vêm do cliente (nunca invente):** tema e formato (Reels, Stories, anúncio); narração em off (padrão) ou ela falando para a câmera (`references/modo-falando.md`), e nesse caso a fala de cada take; oferta, preço, condições e período; anúncio pago (botão "Saiba mais" + QR) ou post orgânico ("link na bio"); destino do QR (o `page_id=674` é a página "Verão Conectado 2026": não o reaproveite sem o cliente confirmar); se os créditos das fotos CC BY vão na legenda do post.
    - **Pergunte e proponha (o cliente aprova no portão 1 ou 2):** cenário, horário e luz; duração; roteiro de takes (por take: lugar, objeto na mão e som ambiente); roupa; gancho; cartão da campanha; texto da cama de SFX.
 4. **Refaça por cena, estação ou cenário** (nada disso se copia do exemplo): âncora de roupa no estilo da persona §3.4 (opaca, sem estampa nem logo; tecido liso ou de trama grande, porque padrão fino tremula); luz pelo sol calculado para lugar, data e hora (`locais-grussai.md` §8; em Grussaí, a tabela "Outras estações" do §3: no inverno, sol a ~19,5° por volta de 15h40 e sol da tarde a ~293–304°; na selfie em contraluz ela caminha para o sul e o mar fica à direita); vento (só o do verão foi pesquisado: pesquise antes); som ambiente do lugar (no prompt de vídeo e na cama de SFX); trechos de lugar do negative_prompt (`prompts-moldes.md` §2.6); espaço livre no snapshot para o gancho, numa área lisa do quadro (o `#q1` do template fica no alto à direita; ex.: Verão Conectado: céu aberto no T1); textos da campanha nos tokens `__…__` do template: gancho, título do cartão em 1 ou 2 partes com ícone opcional (ex.: "VERÃO ☀ CONECTADO", com o sol) e oferta; texto da cama de SFX.
 5. **Projeto e página novos:** `$HOME/hyperframes/<campanha>` e um Artifact novo. Não republique na URL do Verão Conectado (§7.2).
@@ -63,7 +64,7 @@ Cada portão é uma página (Artifact) com A/B lado a lado e perguntas numeradas
 - **Portão 3, o cliente recebe:** A/B de cada take lado a lado com a ref do rosto, players da narração A/B, as fotos dos locais e a pergunta do modelo. **Pare até a resposta** e guarde os `generation_id` aprovados.
 
 **Fase 4. Vídeos, 2 variações por take**
-- Veo 3.1, `start_frame` = generation_id do snapshot aprovado, 9:16, 1080p, 8 s, com áudio, seeds 20260115 e 20260116. O prompt descreve só movimento, câmera e som (`prompts-moldes.md` §2.5–2.6). A personagem não fala.
+- Veo 3.1, `start_frame` = generation_id do snapshot aprovado, 9:16, 1080p, 8 s, com áudio, seeds 20260115 e 20260116. O prompt descreve só movimento, câmera e som (`prompts-moldes.md` §2.5–2.6). A personagem não fala, exceto no modo falando (`references/modo-falando.md` §4).
 - 19.391 créditos por geração, 2 por take (ex.: Verão Conectado, 3 takes × 2 variações = 116.346). Na sessão, 6 gerações em paralelo ficaram prontas em ~3 min (varia). O cliente não recebe nada nesta fase.
 
 **Fase 5. Seleção e QA de cada variação (portão interno)**
@@ -91,9 +92,9 @@ Cada portão é uma página (Artifact) com A/B lado a lado e perguntas numeradas
 1. **Snapshot aprovado antes de qualquer vídeo.** O vídeo só anima (`start_frame`), então rosto, roupa, lugar e luz ficam travados. [vivido]
 2. **2 variações por take** (imagem: 2 requests; Veo: seeds diferentes; narração ou frase trocada: 2 ou 3 seeds). Em toda rodada da sessão, pelo menos uma variação teve defeito. [vivido]
 3. **Recorte antes de regerar.** Escolher in/out em quadros de 24 fps custa zero; o "O" da boca no T1 sumiu assim. Numa refação, mude uma variável só. [vivido]
-4. **A personagem não fala.** Sob narração: `Her lips stay closed the entire time: she does not blow air, sigh, purse her lips or open her mouth, and she never speaks.` A emoção vem de olhos, testa e ombros. Nada de huff, sigh ou risada de boca aberta. [vivido]
+4. **A personagem não fala.** Sob narração: `Her lips stay closed the entire time: she does not blow air, sigh, purse her lips or open her mouth, and she never speaks.` A emoção vem de olhos, testa e ombros. Nada de huff, sigh ou risada de boca aberta. [vivido] Exceção: modo falando (`references/modo-falando.md`). [não testado]
 5. **Um lugar, uma ação e um objeto**, já no 1º quadro, com a tela (se houver) virada para ela. Não mande abaixar, guardar nem girar o objeto: manipulação é onde o Veo mais erra, então revise esses trechos a 8 fps. [vivido]
-6. **Câmera com dono**: quem filma, altura, distância e um movimento só, sem zoom, pan, drone ou gimbal. **Olhar no rosto de quem filma** (na selfie, na própria imagem da tela), nunca cravado na lente. [aplicado]
+6. **Câmera com dono**: quem filma, altura, distância e um movimento só, sem zoom, pan, drone ou gimbal. **Olhar no rosto de quem filma** (na selfie, na própria imagem da tela), nunca cravado na lente. [aplicado] No modo falando, ela fala com quem assiste: olhar na lente ou na tela da selfie. [não testado]
 7. **Nenhum texto, logo, marca ou nome de lugar** no prompt nem nas refs: descreva o lugar fisicamente. Logo, oferta, legenda e QR entram só na edição. [aplicado]
 8. **Moderação**: `an adult ... about 26 years old`, `fine wispy hairs` (nunca `baby hairs`), roupa opaca, nenhum descritor de corpo no vídeo, nenhuma palavra sensível nem para negar. Geração moderada não é cobrada: mude uma coisa e tente de novo. [aplicado]
 9. **Luz e vento coerentes com a geografia e a hora reais** (calcule o sol). Escreva `Not golden-hour orange` quando a hora não for dourada. [aplicado] Em cena interna ou à noite, uma fonte de luz real, com direção (§8). [não testado]
@@ -122,6 +123,7 @@ Cada portão é uma página (Artifact) com A/B lado a lado e perguntas numeradas
 | Trocar uma frase ou o CTA | Gerar só a frase com `previous_text`, emendar e juntar os alignments (`api-elevenlabs.md` §5.5) | ≈1 crédito por caractere |
 | O roteiro todo mudou | Regerar a narração inteira e refazer os tempos | Prosódia contínua |
 | Música | Sem música (padrão); se pedirem, de −18 a −24 dB sob a voz | Sem música parece vídeo real; o nível com música não foi testado |
+| Ela precisa falar na câmera | Modo falando: Veo 3.1 com a fala no prompt, troca de voz para a Radassa (`sts.py`), takes falados mudos no `prep.py` (`FALA`) e legendas pelo STT (`references/modo-falando.md`) | [não testado]; escolha do usuário em 15/10/2026; vídeo 19.391 por geração, como no narrado; a troca de voz tem custo a medir |
 
 ## 5. Comandos essenciais
 
@@ -200,6 +202,8 @@ python3 -I "$SKILL/scripts/poll_round.py" takes/veo_ids.json --out takes   # 2ª
 
 **QA de cada take:** comandos e checklist em `qa-checklist.md` §B.
 
+**Modo falando:** a voz sai dos takes. Rode `sts.py` em cada take escolhido e preencha `FALA` no `prep.py`. A narração em off acima só entra nos takes sem fala, e as legendas vêm do STT da mix (`references/modo-falando.md` §5–8).
+
 Cama de SFX: `api-elevenlabs.md` §7 → `audio/ambiente_sfx.mp3`, com `duration_seconds` ≥ TOTAL/24 (máximo 30; 40 créditos/s) e o texto reescrito para a `<cena>` da campanha (ex.: Verão Conectado: casa de praia no fim de tarde).
 
 **Edição, bloco 1: preparar** (HyperFrames testado na 0.8.161). O QR sai aqui, ANTES do `prep.py` e do render:
@@ -245,12 +249,15 @@ Receita completa do QR: `edicao-hyperframes.md` §11.1 (gerar e conferir se a p�
 | `references/persona-e-marca-voltec.md` | Persona, âncoras de texto, assets, edição de identidade, voz Radassa, marca, QR, CTA, publicação e a personagem em cada cenário (§10). Arquivo grande: leia por seção (Grep `^##` + Read com offset/limit) |
 | `references/edicao-hyperframes.md` | Pastas, in/out em quadros, `prep.py` e mixagem, index, legendas, lint/render, Instagram e ajustes rápidos |
 | `references/qa-checklist.md` | Portões A (snapshot), B (take), C (vídeo final) e D (verificação independente), com comandos |
+| `references/modo-falando.md` | Ela falando para a câmera: fala por take, snapshot, prompt do Veo com fala, troca de voz, QA de sincronia, edição e legendas [não testado] |
 | `scripts/el.py` | Biblioteca e CLI da API (upload, submit, get, wait, tts); lê a chave sem imprimir |
 | `scripts/poll_round.py` | Espera e baixa uma rodada salva como `{nome: generation_id}` (só GET) |
 | `scripts/stt.py` | Transcrição scribe_v1 para QA, com `--ss`, `--t` e `--out` |
 | `scripts/stress.py` | Tônica da marca medida pelo alignment do TTS (`--palavra`, `--corte`) |
+| `scripts/sts.py` | Troca de voz (speech-to-speech) de um take para a voz da persona, com o mesmo tempo; confere a duração |
+| `scripts/stt_alinhamento.py` | STT (`stt.py`) → alignment por caractere, para as legendas do modo falando |
 | `scripts/decode.cjs` | Lê o QR de quadros PNG (jsQR); sai com 1 se não ler |
-| `scripts/prep.py` | Molde: cortes por quadro, fim congelado, grão e mix a −14 LUFS |
+| `scripts/prep.py` | Molde: cortes por quadro, fim congelado, grão e mix a −14 LUFS; `FALA` para takes falados |
 | `scripts/build_legendas.py` | Molde: legendas pelo alignment, injetadas no index |
 | `scripts/index_template.html` | Molde da composição HyperFrames 9:16: tokens da campanha (gancho, cartão, oferta), cidades, CTA, QR e legendas por variável |
 | `scripts/flows_submit_poll.sh` | Alternativa em curl + jq: envia, faz polling com backoff e baixa |

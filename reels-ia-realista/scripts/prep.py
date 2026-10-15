@@ -16,6 +16,9 @@ O que faz (pipeline testado no Reels "Verão Conectado" da Voltec):
          contínua a -36 LUFS com rampa (nunca degrau) no congelamento final; narração com passa-alta,
          compressor e loudnorm -16 LUFS, atrasada NARR_OFFSET s; ducking (sidechain) do ambiente pela voz;
          master em 2 passagens de loudnorm: -14 LUFS integrado, -1,5 dBTP, LRA 11.
+  modo falando (FALA preenchido; references/modo-falando.md) [não testado]: os takes falados entram MUDOS (o som
+         nativo tem a voz original do Veo) e a fala trocada para a voz da persona (sts.py) entra na faixa de voz,
+         cortada no mesmo in/out do vídeo; a narração em off (NARR) é opcional e toca junto.
 Precisa de ffmpeg no PATH. Não usa numpy.
 """
 import json
@@ -47,6 +50,11 @@ TOTAL = None
 # Verão Conectado: NARR = PROJ / "audio" / "narracao_v3.wav"
 NARR = None
 NARR_OFFSET = 0.30   # s em que a narração começa no vídeo (padrão testado; use o MESMO valor no build_legendas.py)
+# MODO FALANDO (references/modo-falando.md) [não testado]: {arquivo do take em TAKES: WAV da fala dela já na voz da
+# persona (scripts/sts.py), com a mesma duração do take}. Esses takes entram mudos e a fala é cortada no mesmo in/out
+# do vídeo, então a boca continua sincronizada. Com FALA preenchido, NARR pode ficar None (só fala na câmera) ou
+# apontar para uma narração em off dos takes sem fala (NARR_OFFSET vale só para ela). Vazio = modo narrado (padrão).
+FALA = {}   # ex.: {"T1_veo_v1_<id>.mp4": PROJ / "audio" / "fala_T1_veo_v1_radassa.wav"}
 # cama de ambiente (SFX ElevenLabs, references/api-elevenlabs.md §7), com o texto da cena DESTA campanha:
 # duration_seconds >= TOTAL/FPS (máx. 30 s); este script corta no fim do vídeo e completa com silêncio.
 # Verão Conectado: audio/ambiente_praia_sfx.mp3 (cena de praia), de 20 s para um vídeo de 20,5 s, então o mix
@@ -96,7 +104,7 @@ def duration(path):
 
 
 def check():
-    faltam = [nome for nome, v in (("SEGMENTS", SEGMENTS), ("TOTAL", TOTAL), ("NARR", NARR)) if not v]
+    faltam = [nome for nome, v in (("SEGMENTS", SEGMENTS), ("TOTAL", TOTAL), ("NARR", NARR or FALA)) if not v]
     if faltam:
         sys.exit(f"prep.py: preencha {', '.join(faltam)} no bloco CONFIGURAÇÃO "
                  "(começam vazios; o exemplo do Verão Conectado está nos comentários)")
@@ -112,9 +120,12 @@ def check():
         p = TAKES / f
         if not p.exists():
             sys.exit(f"take não encontrado: {p} (ajuste TAKES/SEGMENTS no bloco CONFIGURAÇÃO)")
-    for p in (NARR, BED):
+    sobra = [f for f in FALA if f not in {s[0] for s in SEGMENTS}]
+    if sobra:
+        sys.exit(f"FALA tem take que não está em SEGMENTS: {sobra}")
+    for p in [x for x in (NARR, BED) if x] + list(FALA.values()):
         if not Path(p).exists():
-            sys.exit(f"arquivo não encontrado: {p} (ajuste NARR/BED no bloco CONFIGURAÇÃO)")
+            sys.exit(f"arquivo não encontrado: {p} (ajuste NARR/BED/FALA no bloco CONFIGURAÇÃO)")
     print(f"{used} quadros de takes + {TOTAL - used} congelados = {TOTAL} ({TOTAL / FPS:.2f} s)")
 
 
@@ -145,6 +156,9 @@ def audio():
     for i, (f, start, n) in enumerate(SEGMENTS):
         a = start / FPS
         d = n / FPS
+        if f in FALA:                                      # take falado: o som nativo tem a voz original do Veo
+            t += d
+            continue
         pre = XFADE_S if i > 0 else 0.0                    # J-cut: o som do take seguinte entra antes
         post = XFADE_S if i < len(SEGMENTS) - 1 else 0.0   # L-cut: rabo do take anterior
         a0 = max(0.0, a - pre)
@@ -166,20 +180,44 @@ def audio():
                  f"volume='1+{BED_TAIL_BOOST}*clip((t-{tail - 0.1:.2f})/{BED_RAMP_S},0,1)':eval=frame,"
                  f"afade=t=in:d=0.3,afade=t=out:st={min(total_s, bed_len) - 1.2:.3f}:d=1.2,apad=whole_dur={total_s:.3f}[bed]")
     mixes.append("[bed]")
-    parts.append("".join(mixes) + f"amix=inputs={len(mixes)}:normalize=0:duration=longest,"
+    # asetpts=N/SR/TB: no modo falando o 1º take pode entrar mudo; aí a 1ª entrada do amix começa atrasada (adelay), os
+    # timestamps saem tortos e o atrim cortava o ambiente no início do take seguinte (no modo narrado não muda nada)
+    parts.append("".join(mixes) + f"amix=inputs={len(mixes)}:normalize=0:duration=longest,asetpts=N/SR/TB,"
                  f"highpass=f=60,atrim=duration={total_s:.3f}[amb]")
     d = int(NARR_OFFSET * 1000)
     # depois de loudnorm/adelay os timestamps ficam tortos: asetpts=N/SR/TB ANTES do atrim, senão a faixa sai mais curta
-    parts.append(f"[{nb + 1}:a]aformat=channel_layouts=stereo,highpass=f=80,"
-                 "acompressor=threshold=-20dB:ratio=3:attack=5:release=120:makeup=2,"
-                 f"loudnorm=I={VO_LUFS}:TP=-2:LRA=9,aresample=48000,adelay={d}|{d},asetpts=N/SR/TB,"
-                 f"apad=whole_dur={total_s:.3f},atrim=end={total_s:.3f},asplit=2[vo][key]")
+    if not FALA:
+        parts.append(f"[{nb + 1}:a]aformat=channel_layouts=stereo,highpass=f=80,"
+                     "acompressor=threshold=-20dB:ratio=3:attack=5:release=120:makeup=2,"
+                     f"loudnorm=I={VO_LUFS}:TP=-2:LRA=9,aresample=48000,adelay={d}|{d},asetpts=N/SR/TB,"
+                     f"apad=whole_dur={total_s:.3f},atrim=end={total_s:.3f},asplit=2[vo][key]")
+    else:
+        # modo falando: cada fala cortada no mesmo in/out do take e posta no mesmo ponto da linha do tempo do vídeo
+        vozes, k, pos = [], nb + (2 if NARR else 1), 0.0
+        if NARR:
+            parts.append(f"[{nb + 1}:a]aformat=channel_layouts=stereo,aresample=48000,adelay={d}|{d}[narr]")
+            vozes.append("[narr]")
+        for i, (f, start, n) in enumerate(SEGMENTS):
+            if f in FALA:
+                ms = int(round(pos * 1000))
+                parts.append(f"[{k}:a]aformat=channel_layouts=stereo,aresample=48000,"
+                             f"atrim=start={start / FPS:.4f}:duration={n / FPS:.4f},asetpts=PTS-STARTPTS,"
+                             f"afade=t=in:d=0.02,afade=t=out:st={n / FPS - 0.02:.4f}:d=0.02,adelay={ms}|{ms}[fala{i}]")
+                vozes.append(f"[fala{i}]")
+                k += 1
+            pos += n / FPS
+        parts.append("".join(vozes) + f"amix=inputs={len(vozes)}:normalize=0:duration=longest,highpass=f=80,"
+                     "acompressor=threshold=-20dB:ratio=3:attack=5:release=120:makeup=2,"
+                     f"loudnorm=I={VO_LUFS}:TP=-2:LRA=9,aresample=48000,asetpts=N/SR/TB,"
+                     f"apad=whole_dur={total_s:.3f},atrim=end={total_s:.3f},asplit=2[vo][key]")
     parts.append("[amb][key]sidechaincompress=threshold=0.04:ratio=5:attack=25:release=350[ambd]")
     parts.append("[vo][ambd]amix=inputs=2:normalize=0:duration=first[mix]")
     args = ["ffmpeg", "-hide_banner", "-loglevel", "error", "-y"]
     for f, _, _ in SEGMENTS:
         args += ["-i", str(TAKES / f)]
-    args += ["-i", str(BED), "-i", str(NARR), "-filter_complex", ";".join(parts),
+    args += ["-i", str(BED)] + (["-i", str(NARR)] if NARR else [])
+    args += [x for f, _, _ in SEGMENTS if f in FALA for x in ("-i", str(FALA[f]))]
+    args += ["-filter_complex", ";".join(parts),
              "-map", "[mix]", "-ar", "48000", "-ac", "2", str(OUT / "mix_pre.wav")]
     run(args)
     # loudnorm em duas passagens (medição + aplicação linear) para o padrão de redes sociais
