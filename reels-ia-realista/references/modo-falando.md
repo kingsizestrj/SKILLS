@@ -1,4 +1,4 @@
-# Modo falando: a personagem fala para a câmera [não testado]
+# Modo falando: a personagem fala para a câmera
 
 Use quando o pedido for com ela falando ("com ela falando", "ela fala para a câmera", "ela explicando", "depoimento dela"). O caminho foi escolhido pelo usuário em 15/10/2026:
 1. O Veo 3.1 gera o take já com a fala, com os lábios sincronizados com a voz do próprio Veo.
@@ -6,9 +6,15 @@ Use quando o pedido for com ela falando ("com ela falando", "ela fala para a câ
 
 **[Voltec]** A voz é a Radassa 100%, `4yvYc2GSakxLWMhlsd6b`.
 
-**Nada deste modo foi gerado ainda.** O 1º vídeo é o teste: comece com 1 take falado (A/B) e avise o cliente no portão 3 que o formato é novo.
+**Testado em 15/10/2026 e aprovado pelo cliente ("ficou muito bom")** [vivido]:
+- **O vídeo:** 1 take falado (selfie andando na areia, a partir do snapshot T3 do Verão Conectado), mais o cartão final com o CTA em off; 13 s.
+- **Custo:** 38.892 créditos no total.
+- **Projeto (só leitura):** `/home/syllas/hyperframes/voltec-falando-teste/`. Montagem em `audio/COMO_FOI_MONTADA_fala.txt` e decisões em `DECISOES.md`.
+- **Página:** https://claude.ai/artifact/PDfpwNcjVz8u4rk2LDw2Uf
+- **Pedido do cliente para a próxima vez:** ela falar um pouco mais rápido (§2, §4 e §10).
+- **Valores:** os do teste aparecem como "no teste".
 
-O que já foi conferido sem gastar crédito (15/10/2026):
+Antes do teste, sem gastar crédito (15/10/2026):
 - O `prep.py` com `FALA` foi testado com áudio sintético: a fala cai no ponto certo da linha do tempo e os takes falados entram mudos. O modo narrado ficou igual ao entregue na v5, a ±2 LSB, o mesmo ruído entre duas execuções.
 - O `stt_alinhamento.py` + `build_legendas.py` foram testados com o STT da master da v5.
 - O `sts.py` foi testado com um modelo inexistente: o envio chega à API, que recusa com `model_not_found`, e nada é cobrado.
@@ -26,20 +32,23 @@ Alternativas registradas, não usadas por decisão do usuário:
 | Boca | Lábios fechados (SKILL.md §3, regra 4) | Ela diz a fala do take |
 | Olhar | No rosto de quem filma, nunca cravado na lente (regra 6) | Falando com quem assiste: na lente, ou, na selfie, na própria imagem da tela (olhos um pouco abaixo da lente), com desvios naturais |
 | Voz | TTS eleven_v4 da narração inteira numa request | Voz do Veo trocada take a take (`sts.py`) |
-| Texto | Roteiro da narração | Uma fala por take, até ~90 caracteres (§2) |
+| Texto | Roteiro da narração | Uma fala por take, até ~75 caracteres (§2) |
 | negative_prompt | Com `talking, speech, lip-syncing` e o conjunto de boca | Sem esses termos (§4) |
 | Som nativo do take | Entra a −30 LUFS | Take falado entra mudo, porque tem a voz original do Veo; o ambiente vem da cama de SFX |
 | Legendas | Alignment do TTS | STT da mix final → `stt_alinhamento.py` (§8) |
-| Custo | 19.391 por geração de vídeo | O mesmo no vídeo, mais a troca de voz (custo a medir, §6) |
+| Custo | 19.391 por geração de vídeo | O mesmo no vídeo; troca de voz e STT somaram ~110 créditos no teste (§6) |
 
-Misturar os dois modos é possível: takes falados (`FALA`) e takes com narração em off por cima (`NARR`), sem uma voz por cima da outra.
+Misturar os dois modos é possível: takes falados (`FALA`) e takes com narração em off por cima (`NARR`), sem uma voz por cima da outra. No teste, o take falado foi seguido do CTA em off sobre o quadro congelado [vivido].
 
 ## 2. Roteiro: a fala de cada take
 
 - **O que ela diz é o anúncio:** a fala de cada take vem aprovada no portão 1, palavra por palavra. Oferta, preço e CTA vêm do cliente, como sempre (SKILL.md §1b).
-- **Uma fala por take, curta.** O take tem 8 s, e a fala deve caber em ~5–6 s, com ~1 s livre antes e depois para o corte. Ritmo de referência: a Radassa no TTS fala ~17–18 caracteres/s (294 caracteres ≈ 16,6 s). O ritmo do Veo não foi medido. Por isso, no máximo ~90 caracteres por take. Mensagem maior vira mais takes, com corte seco entre eles (como em vlog), ou narração em off sobre takes sem fala.
-- **Marca e números:** "Voltéc" com acento dentro das aspas do prompt, para puxar o vol-TÉC [não testado]; "Voltec" na tela. Números por extenso.
-- **CTA falado:** a frase paga do SKILL.md §7.1 tem 56 caracteres e cabe num take.
+- **Uma fala por take, curta.** O take tem 8 s.
+  - **Ritmo medido no teste** [vivido]: com `at an easy pace` no prompt, o Veo falou 90 caracteres de 0,18 s a 7,76 s, ~12 caracteres/s. A Radassa no TTS fala ~17–18/s (294 caracteres ≈ 16,6 s). Os 90 caracteres ocuparam o take quase inteiro, e o cliente achou que ela podia falar um pouco mais rápido.
+  - **Limite:** no máximo ~75 caracteres por take, e peça um ritmo mais vivo (§4) [não testado].
+  - **Mensagem maior** vira mais takes, com corte seco entre eles (como em vlog), ou narração em off sobre takes sem fala.
+- **Marca e números:** "Voltéc" com acento dentro das aspas do prompt, para puxar o vol-TÉC; "Voltec" na tela. Números por extenso. No teste, o cliente aprovou a fala assim [vivido].
+- **CTA falado:** a frase paga do SKILL.md §7.1 tem 56 caracteres e cabe num take. No teste, o CTA foi a narração em off já aprovada, reaproveitada sem custo.
 - Guarde cada fala em `prompts/fala_<take>.txt`: o QA compara o STT com ela.
 - Prévia para o portão 3 (opcional, ≈1 crédito/caractere): gere as falas na voz da Radassa pelo TTS normal (SKILL.md §5, Narração), só para o cliente ouvir o texto e o tom. A voz final vem do `sts.py`.
 
@@ -47,28 +56,32 @@ Misturar os dois modos é possível: takes falados (`FALA`) e takes com narraç�
 
 - Rosto grande no quadro: do peito para cima ou meio corpo, de frente ou 3/4. Rosto pequeno não segura a identidade (SKILL.md §8), e na fala a boca precisa aparecer bem.
 - No 1º quadro: boca fechada ou sorriso leve, nada na frente da boca (mão, celular, cabelo) e as mãos paradas numa posição simples.
-- Olhar: amiga filmando → na lente, ou no rosto dela logo acima da lente. Selfie → na própria imagem da tela, como no T3 testado (`prompts-moldes.md` §2.5).
+- Olhar: amiga filmando → na lente, ou no rosto dela logo acima da lente. Selfie → na própria imagem da tela, como no T3 (`prompts-moldes.md` §2.5).
 - Luz suave e com direção no rosto: na fala aparecem dentes e o interior da boca, e sombra dura no rosto piora os dois.
 - Use os moldes `prompts-moldes.md` §2.1–2.3 com essa pose. A edição de identidade é a mesma (persona §5). Revise com `qa-checklist.md` §A, com atenção à boca a 100%.
+- **No teste** [vivido]: o snapshot T3 aprovado do Verão Conectado (`O2D10yzDXIp2eu8jbhtj`: selfie na areia, sorriso de boca fechada, olhando a tela) serviu sem mudança e sem custo de imagem. Um snapshot aprovado de outro vídeo pode ser reaproveitado se tiver rosto grande e boca livre.
 
 ## 4. Prompt do Veo com fala
 
-Mesmo esqueleto de `prompts-moldes.md` §2.5, mudando o miolo. O texto abaixo é molde [não testado]: preencha as chaves e mantenha o resto.
+Mesmo esqueleto de `prompts-moldes.md` §2.5, mudando o miolo. O molde abaixo é o do teste [vivido], com uma mudança [não testado]: o ritmo. O teste usou `at an easy pace`. Preencha as chaves e mantenha o resto. O texto real do teste está em `/home/syllas/hyperframes/voltec-falando-teste/prompts/T1_video_veo.txt`.
 
 ```text
 Vertical 9:16 amateur smartphone video, one continuous real-time take with no cuts, filmed {QUEM FILMA, DISTÂNCIA, ALTURA, QUAL CÂMERA}: natural micro-shake and slow breathing sway, no zoom, no pan. The woman in the first frame, {ÂNCORA CURTA: adulta, cabelo, roupa}, {ONDE ESTÁ + POSE EXATA DO SNAPSHOT, COM AS DUAS MÃOS}.
 [00:00-00:01] She looks {at the lens | at her own image on the screen}, relaxed, with a soft closed-lip smile, and takes a small breath.
-[00:01-00:07] She speaks to the camera in Brazilian Portuguese, in a warm, natural, conversational tone, at an easy pace: "{FALA}" {UM GESTO PEQUENO: a small nod, eyebrows lifting on the key word; her hands stay as in the first frame}.
+[00:01-00:07] She speaks to the camera in Brazilian Portuguese, in a warm, natural, conversational tone, at a lively, natural pace, a little quick, like someone recording a story for friends: "{FALA}" {UM GESTO PEQUENO: a small nod, eyebrows lifting on the key word; her hands stay as in the first frame}.
 [00:07-00:08] She finishes with a closed-lip smile and holds still, blinking naturally.
 Only she speaks, in a natural young adult woman's voice with a Brazilian accent; no one else speaks, no narrator, no voice-over. {REGRA DO OBJETO}. The {3-4 ELEMENTOS VISÍVEIS NO SNAPSHOT} stay exactly as in the first frame; {O QUE SE MEXE}. Light: {A MESMA DO SNAPSHOT}. Unedited, candid phone footage: natural skin texture with visible pores, natural teeth, crisp daylight frames with almost no motion blur, true-to-life colors.
 Ambient noise: {CAMA}, quiet under her voice, recorded by the phone's built-in microphone. SFX: {RUÍDO NO MICROFONE}. No music. (no subtitles)
 ```
 
-- O que sai do esqueleto: `Her lips stay closed the entire time...`, o "nunca som de boca" e o olhar só no rosto de quem filma.
+- O que sai do esqueleto: `Her lips stay closed the entire time...`, o "nunca som de boca" e o olhar só no rosto de quem filma. Na selfie do teste também saíram a rajada de vento e a virada de cabeça para o mar do T3 (tirariam a boca de vista), e o vento no microfone ficou leve.
 - A fala vai entre aspas, na língua da fala (português), e o resto do prompt fica em inglês, como nos outros moldes.
 - `Brazilian Portuguese` e `Brazilian accent` são obrigatórios: o `sts.py` troca o timbre, mas mantém o sotaque e a entonação da fonte.
-- **negative_prompt:** a lista "Geral" do `prompts-moldes.md` §2.6, **tirando** `talking, speech, lip-syncing` e sem o conjunto de boca (`open mouth, pursed lips, ...`). Acrescente `second voice, other people talking, off-screen voice, crowd chatter`. Mantenha `narration, voice-over` (nenhum narrador além dela).
-- O corpo é o mesmo do modo narrado (`generate_audio: true` é obrigatório: sem áudio não há fala), e a rodada é a do SKILL.md §5.
+- **O que o Veo não obedeceu no teste** [vivido]:
+  - Começou a falar aos 0,18 s, sem o 1 s de silêncio pedido. Escolha o in pelo STT.
+  - A mão esquerda entrou no quadro num gesto no cabelo (2,1–2,4 s), embora o prompt pedisse fora. O gesto saiu natural e sem defeito; revise mãos a 8 fps.
+- **negative_prompt:** a lista "Geral" do `prompts-moldes.md` §2.6, **tirando** `talking, speech, lip-syncing` e sem o conjunto de boca (`open mouth, pursed lips, ...`). Acrescente `second voice, other people talking, off-screen voice, crowd chatter`. Mantenha `narration, voice-over` (nenhum narrador além dela). [vivido]
+- O corpo é o mesmo do modo narrado (`generate_audio: true` é obrigatório: sem áudio não há fala), e a rodada é a do SKILL.md §5. No teste, as 2 variações ficaram prontas em ~3 min.
 
 ## 5. Escolha da variação (antes de trocar a voz)
 
@@ -77,8 +90,9 @@ Faça o `qa-checklist.md` §B normal e mais isto, em cada variação:
 python3 -I "$SKILL/scripts/stt.py" "takes/T1_veo_v1_<id>.mp4" --out qa/T1_veo_v1_veo_stt.json | jq -r .text   # tem de bater com prompts/fala_T1.txt
 ```
 - Palavra trocada, faltando ou sobrando: use a outra variação. Se as duas falham, regere mudando uma variável (fala mais curta ou palavra mais simples).
+- **No teste** [vivido]: a v1 gaguejou ("Casa... asa de praia") e a v2 disse a frase exata. O STT pegou na hora, e por isso continuam sendo 2 variações por take.
 - Marca: o STT costuma escrever "Voltec", "Voltech" ou parecido. A tônica certa (vol-TÉC) não se mede com segurança aqui: liste o instante para o cliente ouvir no portão. Se o Veo insistir em "VÓL-tec", tire a marca da fala; ela fica nos cartões.
-- Escolha in/out em pausas, nunca no meio de palavra: in ≥ 0,1 s antes da 1ª palavra e out ≥ 0,15 s depois da última (tempos do STT × 24 = quadro).
+- Escolha in/out em pausas, nunca no meio de palavra: in ≥ 0,1 s antes da 1ª palavra e out ≥ 0,15 s depois da última (tempos do STT × 24 = quadro). No teste, a fala ocupou o take inteiro, que entrou do quadro 0 ao 191.
 
 ## 6. Troca de voz para a persona (`sts.py`)
 
@@ -88,17 +102,21 @@ python3 -I "$SKILL/scripts/stt.py" audio/fala_T1_veo_v1_radassa.wav --out qa/T1_
 ```
 - **O que o script faz:**
   - extrai o áudio do take e envia com `eleven_multilingual_sts_v2`, o único modelo de STS com português na conta (GET /v1/models, 15/10/2026);
-  - usa `wav_48000`, `remove_background_noise=true` (o ambiente do Veo sai e volta pela cama de SFX) e os settings 0.45/0.85 da voz [não testado no STS];
+  - usa `wav_48000`, `remove_background_noise=true` (o ambiente do Veo sai e volta pela cama de SFX) e os settings 0.45/0.85 da voz;
   - avisa se a duração mudar mais de 1 quadro.
+- **No teste** [vivido], com seed 20261015 e os settings acima:
+  - a saída durou 7,988 s contra 8,009 s da entrada;
+  - as mesmas 15 palavras;
+  - deriva máxima de 0,04 s (1 quadro);
+  - o cliente aprovou a voz.
 - Use a mesma seed e os mesmos settings em todos os takes, para a voz não mudar entre cortes. Se o timbre não parecer a Radassa, suba `--similarity` ou troque a seed. Mude uma coisa por vez.
-- **Custo:** ainda não medido. Na 1ª vez, compare o saldo antes e depois (só leitura):
+- **Custo** [vivido]: a troca de 8 s não apareceu no saldo logo depois da chamada. O teste inteiro gastou 110 créditos além das 2 gerações do Veo (troca de voz + 4 transcrições). Para medir de novo, compare o saldo antes e depois (só leitura):
 ```bash
 python3 -I - <<'EOF'
 import os, sys; sys.path.insert(0, os.environ["SKILL"] + "/scripts"); import el
 st, r = el.req("GET", "/user/subscription"); print(st, r.get("character_count"), "de", r.get("character_limit"))
 EOF
 ```
-Anote o valor neste arquivo e em `modelos-e-custos.md`.
 
 ## 7. QA do take falado (além do §B)
 
@@ -114,42 +132,61 @@ for x, y in zip(a, b): print(f'{x["text"]:>14} {x["start"]:6.2f} {y["start"]:6.2
 print("deriva máxima (s):", round(max(abs(y["start"] - x["start"]) for x, y in zip(a, b)), 3))
 EOF
 ```
-3. **Boca:** faça tiras numeradas a 24 fps (comando 3 do `qa-checklist.md` §B, com o recorte na boca), centradas nas palavras com p, b ou m, em que os lábios têm de fechar. Use os instantes do STT.
+3. **Boca:** faça tiras numeradas a 24 fps (comando 3 do `qa-checklist.md` §B, com o recorte na boca), centradas nas palavras com p, b ou m, em que os lábios têm de fechar. Use os instantes do STT. Na selfie do teste, o rosto ficou mais baixo que o esperado: a boca ficou em y ≈ 33–40% da altura do quadro.
 4. **Dentes e boca:** procure dentes que se fundem, somem ou tremem, e língua estranha, nas mesmas tiras.
 5. **Olhar e identidade durante a fala:** folha de contato a 2 fps. A fala puxa o rosto: compare com o snapshot e a ref.
 6. **Para o cliente ouvir:** liste na página a fala de cada take, cada vez que ela diz a marca e os cortes.
+
+**No teste** [vivido]:
+- os lábios fecharam no "m" de "merece" e de "meses" no quadro certo;
+- os dentes ficaram levemente irregulares por 1 ou 2 quadros nas transições rápidas (~3,0 s e ~7,3 s), sem incomodar o cliente;
+- a identidade se manteve em todos os quadros.
 
 ## 8. Edição
 
 - **`prep.py`:**
   - `SEGMENTS` como sempre, com in/out em pausas.
   - `FALA = {"T1_veo_v1_<id>.mp4": PROJ / "audio" / "fala_T1_veo_v1_radassa.wav", ...}`.
-  - `NARR = None` (só fala na câmera) ou a narração em off dos takes sem fala.
+  - `NARR = None` (só fala na câmera) ou a narração em off dos takes sem fala. No teste: `NARR` = o CTA em off, com `NARR_OFFSET` 8,15, logo depois do véu (8,0) e do cartão (8,15).
   - Os takes de `FALA` entram mudos e a fala é cortada no mesmo in/out do vídeo.
   - Gere a cama de SFX com `duration_seconds` ≥ TOTAL/24: nos takes falados, ela é o único ambiente.
-- **`TOTAL`:** última palavra na linha do tempo + ~1 s, como no modo narrado.
-- **Legendas:** depois do `python3 prep.py`, faça o STT da mix e converta para alignment:
+- **`TOTAL`:** última palavra na linha do tempo + ~1 s, como no modo narrado. No teste: o CTA terminou em 12,07 s, então TOTAL = 312 (13,0 s).
+- **Legendas:** depois do `python3 prep.py`, faça o STT da mix. Ajuste a pontuação à fala aprovada e converta para alignment:
   ```bash
   cd "$HF" && python3 -I "$SKILL/scripts/stt.py" media/mix.wav --out "$QA/mix_stt.json" | jq -r .text
   python3 -I "$SKILL/scripts/stt_alinhamento.py" "$QA/mix_stt.json" "$PROJ/audio/mix_alignment.json"   # imprime o texto
   ```
+  O texto da legenda é o do STT. No teste, ele trocou "internet?" por "internet," e escreveu "ninguém" e "merece." [vivido]. Antes de converter, troque esses `text` no JSON pelo que está na fala aprovada.
 - **No `build_legendas.py`:**
   - `ALIGN = PROJ / "audio" / "mix_alignment.json"` e `NARR_OFFSET = 0.0`, porque a mix já está no tempo do vídeo.
-  - `PHRASES` escritos a partir do texto que o conversor imprime: mesmas palavras, já com a grafia de tela do `FIX`.
+  - `PHRASES` escritos a partir do texto que o conversor imprime: mesmas palavras, já com a grafia de tela do `FIX`. As palavras do CTA em off também entram, num bloco só no fim: depois de `CTA_START` ele não aparece, mas tem de existir.
   - No `FIX`, as grafias que o STT erra. Nos STT da v5 apareceram "Voltech" e "Voltek" (→ "Voltec") e "Grossaí" (→ "Grussaí").
-  - `START_FIX` e `LOW_RANGES`: como sempre (edicao §8).
+  - `START_FIX` e `LOW_RANGES`: como sempre (edicao §8). No teste, ficaram vazios.
 - **Cartões do `index.html`:** os tempos `T` ficam ancorados nas palavras do mesmo STT. Confira se legenda e cartões não cobrem a boca: no modo falando o rosto é o centro do quadro.
+  - **Gancho na selfie** [vivido]: abaixo do rosto, sobre a roupa (`#q1` com `top: 1130px`). No alto, onde fica no Verão Conectado, ele cobriria o cabelo e a testa. A legenda (y ≈ 1000) fica entre o rosto e o gancho.
+  - **Vídeo curto:** sem o cartão das cidades; apague o `<div id="cities">` (edicao §13.2). As cidades seguem na linha do cartão final. No teste: gancho, marca no "Voltec", oferta e cartão final em 13 s [vivido].
+- **Fim:** a transcrição da mix marca "[música]" no rabo, onde a cama sobe sob o cartão final, igual à v5 entregue. É o som ambiente, não música.
 
-## 9. Riscos conhecidos [não testado]
+## 9. Riscos conhecidos
 
-- **Fala errada:** o Veo pode errar ou pular palavras, ou falar com sotaque de Portugal. O STT pega na escolha da variação (§5).
-- **Marca:** a tônica de "Voltec" pode sair errada, e o `sts.py` não corrige pronúncia, só o timbre.
-- **Sincronia:** o STS pode mexer no tempo; confira com a deriva do §7.
-- **Ruídos:** respiração e estalos da voz do Veo passam para a voz trocada (`remove_background_noise` tira o ambiente, não a respiração).
-- **Rosto:** fala puxa deformação de boca e dentes e deriva de identidade. Rosto grande, boa luz e tiras a 24 fps.
-- **Duração:** take de 8 s limita a fala. Frase longa demais sai corrida ou cortada.
+- **Fala errada:** o Veo pode errar ou pular palavras, ou falar com sotaque de Portugal. O STT pega na escolha da variação (§5). [vivido: 1 das 2 variações gaguejou no teste]
+- **Marca:** a tônica de "Voltec" pode sair errada, e o `sts.py` não corrige pronúncia, só o timbre. [não testado: no teste saiu aprovada]
+- **Sincronia:** o STS pode mexer no tempo; confira com a deriva do §7. [no teste: 0,04 s]
+- **Ruídos:** respiração e estalos da voz do Veo passam para a voz trocada (`remove_background_noise` tira o ambiente, não a respiração). [não testado]
+- **Rosto:** fala puxa deformação de boca e dentes e deriva de identidade. Rosto grande, boa luz e tiras a 24 fps. [no teste: só dentes por 1 ou 2 quadros]
+- **Duração:** take de 8 s limita a fala. Frase longa demais sai corrida ou cortada; no ritmo do teste, 90 caracteres já ocuparam o take quase inteiro. [vivido]
 
-## 10. Registro
+## 10. Para ela falar mais rápido (pedido do cliente para a próxima vez) [não testado]
 
-- `audio/COMO_FOI_MONTADA_fala.txt`: por take, o take do Veo, a fala, a seed e os settings do `sts.py`, in/out e a deriva medida.
-- Depois do 1º vídeo real neste modo, atualize este arquivo: o que funcionou vira [vivido], e entram o custo medido do STS e o ritmo de fala do Veo.
+O cliente achou que ela podia falar "um pouco mais rápido". Opções, da mais barata para a mais cara:
+1. **Na edição, sem crédito:** acelerar o take falado 1,08–1,12x.
+   - O vídeo vai com `setpts=PTS/1.1` e a fala trocada com `atempo=1.1`, os dois no mesmo fator para a boca continuar sincronizada.
+   - Isso acelera também o andar, o vento e o balanço da câmera: confira se ainda parece real.
+   - O `prep.py` ainda não faz isso: seria uma opção nova, com teste de sincronia (STT x quadros).
+2. **No próximo take gerado:** fala de até ~75 caracteres e o ritmo do molde do §4 (`at a lively, natural pace, a little quick, ...`), no lugar do `at an easy pace` do teste.
+3. **Regerar o take do teste:** com o prompt do item 2. Custa 2 × 19.391.
+
+## 11. Registro
+
+- `audio/COMO_FOI_MONTADA_fala.txt`: por take, o take do Veo, a fala, a seed e os settings do `sts.py`, in/out e a deriva medida (modelo: o do projeto de teste).
+- Depois de cada vídeo real neste modo, atualize este arquivo: o que funcionou vira [vivido], e entram o ritmo de fala do Veo e o que o cliente achou.

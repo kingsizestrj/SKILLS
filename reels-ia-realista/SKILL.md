@@ -22,7 +22,7 @@ Produção e edição de qualquer vídeo realista com IA da Voltec estrelado pel
 - Geração pela API da ElevenLabs: imagem (snapshot), vídeo (Veo 3.1; Seedance pela API só com liberação, ou manual no app), narração com voz clonada, SFX e STT.
 - Edição no HyperFrames: cortes por quadro, mixagem, cartões, legendas sincronizadas, CTA e QR.
 - Ajuste num vídeo de IA já entregue: recortar take, trocar variação, trocar uma frase ou o CTA, versão com legendas, refinar a identidade.
-- **Com ela falando para a câmera** ("com ela falando", "ela fala", "ela explicando"): modo falando, em `references/modo-falando.md`. O Veo 3.1 gera o take com a fala e o `sts.py` troca a voz para a Radassa. [não testado]
+- **Com ela falando para a câmera** ("com ela falando", "ela fala", "ela explicando"): modo falando, em `references/modo-falando.md`. O Veo 3.1 gera o take com a fala e o `sts.py` troca a voz para a Radassa. [vivido: teste de 13 s aprovado em 15/10/2026]
 - **[GERAL]** Outra marca ou persona: o que não é [Voltec] serve, com adaptação (troque o §7.1 e preencha os slots do §1b). Projeto de referência: `/home/syllas/hyperframes/voltec-reels-ia/` (Verão Conectado; só leitura).
 - Não serve para motion graphics sem pessoa nem cena gerada (aí basta o HyperFrames) nem para assuntos da Voltec sem vídeo (rede, GenieACS, TR-069).
 
@@ -92,9 +92,9 @@ Cada portão é uma página (Artifact) com A/B lado a lado e perguntas numeradas
 1. **Snapshot aprovado antes de qualquer vídeo.** O vídeo só anima (`start_frame`), então rosto, roupa, lugar e luz ficam travados. [vivido]
 2. **2 variações por take** (imagem: 2 requests; Veo: seeds diferentes; narração ou frase trocada: 2 ou 3 seeds). Em toda rodada da sessão, pelo menos uma variação teve defeito. [vivido]
 3. **Recorte antes de regerar.** Escolher in/out em quadros de 24 fps custa zero; o "O" da boca no T1 sumiu assim. Numa refação, mude uma variável só. [vivido]
-4. **A personagem não fala.** Sob narração: `Her lips stay closed the entire time: she does not blow air, sigh, purse her lips or open her mouth, and she never speaks.` A emoção vem de olhos, testa e ombros. Nada de huff, sigh ou risada de boca aberta. [vivido] Exceção: modo falando (`references/modo-falando.md`). [não testado]
+4. **A personagem não fala.** Sob narração: `Her lips stay closed the entire time: she does not blow air, sigh, purse her lips or open her mouth, and she never speaks.` A emoção vem de olhos, testa e ombros. Nada de huff, sigh ou risada de boca aberta. [vivido] Exceção: modo falando (`references/modo-falando.md`). [vivido]
 5. **Um lugar, uma ação e um objeto**, já no 1º quadro, com a tela (se houver) virada para ela. Não mande abaixar, guardar nem girar o objeto: manipulação é onde o Veo mais erra, então revise esses trechos a 8 fps. [vivido]
-6. **Câmera com dono**: quem filma, altura, distância e um movimento só, sem zoom, pan, drone ou gimbal. **Olhar no rosto de quem filma** (na selfie, na própria imagem da tela), nunca cravado na lente. [aplicado] No modo falando, ela fala com quem assiste: olhar na lente ou na tela da selfie. [não testado]
+6. **Câmera com dono**: quem filma, altura, distância e um movimento só, sem zoom, pan, drone ou gimbal. **Olhar no rosto de quem filma** (na selfie, na própria imagem da tela), nunca cravado na lente. [aplicado] No modo falando, ela fala com quem assiste: olhar na lente ou na tela da selfie. [vivido na selfie]
 7. **Nenhum texto, logo, marca ou nome de lugar** no prompt nem nas refs: descreva o lugar fisicamente. Logo, oferta, legenda e QR entram só na edição. [aplicado]
 8. **Moderação**: `an adult ... about 26 years old`, `fine wispy hairs` (nunca `baby hairs`), roupa opaca, nenhum descritor de corpo no vídeo, nenhuma palavra sensível nem para negar. Geração moderada não é cobrada: mude uma coisa e tente de novo. [aplicado]
 9. **Luz e vento coerentes com a geografia e a hora reais** (calcule o sol). Escreva `Not golden-hour orange` quando a hora não for dourada. [aplicado] Em cena interna ou à noite, uma fonte de luz real, com direção (§8). [não testado]
@@ -123,7 +123,7 @@ Cada portão é uma página (Artifact) com A/B lado a lado e perguntas numeradas
 | Trocar uma frase ou o CTA | Gerar só a frase com `previous_text`, emendar e juntar os alignments (`api-elevenlabs.md` §5.5) | ≈1 crédito por caractere |
 | O roteiro todo mudou | Regerar a narração inteira e refazer os tempos | Prosódia contínua |
 | Música | Sem música (padrão); se pedirem, de −18 a −24 dB sob a voz | Sem música parece vídeo real; o nível com música não foi testado |
-| Ela precisa falar na câmera | Modo falando: Veo 3.1 com a fala no prompt, troca de voz para a Radassa (`sts.py`), takes falados mudos no `prep.py` (`FALA`) e legendas pelo STT (`references/modo-falando.md`) | [não testado]; escolha do usuário em 15/10/2026; vídeo 19.391 por geração, como no narrado; a troca de voz tem custo a medir |
+| Ela precisa falar na câmera | Modo falando: Veo 3.1 com a fala no prompt, troca de voz para a Radassa (`sts.py`), takes falados mudos no `prep.py` (`FALA`) e legendas pelo STT (`references/modo-falando.md`) | [vivido: teste de 13 s aprovado em 15/10/2026, 38.892 créditos]; até ~75 caracteres de fala por take; troca de voz e STT ~110 créditos |
 
 ## 5. Comandos essenciais
 
@@ -249,7 +249,7 @@ Receita completa do QR: `edicao-hyperframes.md` §11.1 (gerar e conferir se a p�
 | `references/persona-e-marca-voltec.md` | Persona, âncoras de texto, assets, edição de identidade, voz Radassa, marca, QR, CTA, publicação e a personagem em cada cenário (§10). Arquivo grande: leia por seção (Grep `^##` + Read com offset/limit) |
 | `references/edicao-hyperframes.md` | Pastas, in/out em quadros, `prep.py` e mixagem, index, legendas, lint/render, Instagram e ajustes rápidos |
 | `references/qa-checklist.md` | Portões A (snapshot), B (take), C (vídeo final) e D (verificação independente), com comandos |
-| `references/modo-falando.md` | Ela falando para a câmera: fala por take, snapshot, prompt do Veo com fala, troca de voz, QA de sincronia, edição e legendas [não testado] |
+| `references/modo-falando.md` | Ela falando para a câmera: fala por take, snapshot, prompt do Veo com fala, troca de voz, QA de sincronia, edição e legendas; testado e aprovado em 15/10/2026 |
 | `scripts/el.py` | Biblioteca e CLI da API (upload, submit, get, wait, tts); lê a chave sem imprimir |
 | `scripts/poll_round.py` | Espera e baixa uma rodada salva como `{nome: generation_id}` (só GET) |
 | `scripts/stt.py` | Transcrição scribe_v1 para QA, com `--ss`, `--t` e `--out` |

@@ -16,7 +16,7 @@ O que faz (pipeline testado no Reels "Verão Conectado" da Voltec):
          contínua a -36 LUFS com rampa (nunca degrau) no congelamento final; narração com passa-alta,
          compressor e loudnorm -16 LUFS, atrasada NARR_OFFSET s; ducking (sidechain) do ambiente pela voz;
          master em 2 passagens de loudnorm: -14 LUFS integrado, -1,5 dBTP, LRA 11.
-  modo falando (FALA preenchido; references/modo-falando.md) [não testado]: os takes falados entram MUDOS (o som
+  modo falando (FALA preenchido; references/modo-falando.md) [vivido em 15/10/2026]: os takes falados entram MUDOS (o som
          nativo tem a voz original do Veo) e a fala trocada para a voz da persona (sts.py) entra na faixa de voz,
          cortada no mesmo in/out do vídeo; a narração em off (NARR) é opcional e toca junto.
 Precisa de ffmpeg no PATH. Não usa numpy.
@@ -50,7 +50,7 @@ TOTAL = None
 # Verão Conectado: NARR = PROJ / "audio" / "narracao_v3.wav"
 NARR = None
 NARR_OFFSET = 0.30   # s em que a narração começa no vídeo (padrão testado; use o MESMO valor no build_legendas.py)
-# MODO FALANDO (references/modo-falando.md) [não testado]: {arquivo do take em TAKES: WAV da fala dela já na voz da
+# MODO FALANDO (references/modo-falando.md) [vivido em 15/10/2026]: {arquivo do take em TAKES: WAV da fala dela já na voz da
 # persona (scripts/sts.py), com a mesma duração do take}. Esses takes entram mudos e a fala é cortada no mesmo in/out
 # do vídeo, então a boca continua sincronizada. Com FALA preenchido, NARR pode ficar None (só fala na câmera) ou
 # apontar para uma narração em off dos takes sem fala (NARR_OFFSET vale só para ela). Vazio = modo narrado (padrão).

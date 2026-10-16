@@ -158,7 +158,8 @@
           </div>
         </div>
 
-        <!-- Fixo da Voltec: lista que acende no ritmo da narração (as 4 cidades atendidas, nesta ordem); só os tempos T.cities mudam -->
+        <!-- Fixo da Voltec: lista que acende no ritmo da narração (as 4 cidades atendidas, nesta ordem); só os tempos T.cities mudam.
+             Vídeo curto: pode apagar este div inteiro (o script só anima o que existir; as cidades seguem na linha do cartão final) -->
         <div id="cities" class="card">
           <div class="lead">Tem Voltec em</div>
           <div class="city"><svg class="pin" viewBox="0 0 30 38"><path d="M15 0C6.7 0 0 6.6 0 14.8 0 25.9 15 38 15 38s15-12.1 15-23.2C30 6.6 23.3 0 15 0z" fill="#d7262f"/><circle cx="15" cy="14.5" r="5.6" fill="#fff"/></svg>Grussaí</div>
@@ -233,12 +234,14 @@
       tl.to("#brand", { y: 30, opacity: 0, duration: 0.2, ease: "power1.in" }, T.brandOut);
 
       // Cidades no ritmo da narração (o cartão mostra todas esmaecidas; cada uma acende na sua palavra)
-      tl.fromTo("#cities", { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, T.citiesIn);
-      document.querySelectorAll("#cities .city").forEach((el, i) => {
-        tl.to(el, { opacity: 1, duration: 0.25, ease: "power1.out" }, T.cities[i]);
-        tl.fromTo(el.querySelector(".pin"), { scale: 0.55 }, { scale: 1, transformOrigin: "50% 100%", duration: 0.4, ease: "back.out(3)" }, T.cities[i]);
-      });
-      tl.to("#cities", { y: 24, opacity: 0, duration: 0.2, ease: "power1.in" }, T.citiesOut);
+      if (document.querySelector("#cities")) {   // vídeo curto sem o cartão das cidades: apague o div e deixe cities: []
+        tl.fromTo("#cities", { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, T.citiesIn);
+        document.querySelectorAll("#cities .city").forEach((el, i) => {
+          tl.to(el, { opacity: 1, duration: 0.25, ease: "power1.out" }, T.cities[i]);
+          tl.fromTo(el.querySelector(".pin"), { scale: 0.55 }, { scale: 1, transformOrigin: "50% 100%", duration: 0.4, ease: "back.out(3)" }, T.cities[i]);
+        });
+        tl.to("#cities", { y: 24, opacity: 0, duration: 0.2, ease: "power1.in" }, T.citiesOut);
+      }
 
       // Oferta: título revelado por clip-path (propriedade permitida pelo lint); cada linha entra no seu instante de T.offerSub.
       // Vídeo sem oferta: apague o <div id="offer"> inteiro e deixe offerSub: [] (a trava abaixo para o check e o render).
